@@ -4,11 +4,14 @@ require 'json'
 require 'openssl'
 
 class SolidfireApi
+  VERSION = "7.0"
 
-  attr_accessor :url, :redacted_url
+  attr_accessor :url, :redacted_url, :debug
+
+  @debug = false
 
   def initialize(url)
-    Puppet.debug("#{self.class}::initialize -> #{url}")
+    debug("#{self.class}::initialize -> #{url}")
     @url = URI.parse(url)
     raise ArgumentError, "Invalid scheme #{@url.scheme}. Must be https" \
                          unless @url.scheme == 'https'
@@ -17,11 +20,11 @@ class SolidfireApi
     redacted_url = @url.dup
     redacted_url.password = "****" if redacted_url.password
     @redacted_url=redacted_url.to_s
-    @url.path = @url.path + "json-rpc/7.0"
+    @url.path = @url.path + "json-rpc/#{VERSION}"
   end
 
   def getVolumeByName(name)
-    Puppet.debug("#{self.class}::getVolumeByName: #{name}")
+    debug("#{self.class}::getVolumeByName: #{name}")
     volList = ListActiveVolumes()
     volList['volumes'].each do |vol|
       if vol['name'] == name then
@@ -32,7 +35,7 @@ class SolidfireApi
   end
 
   def getVolumeByID(id)
-    Puppet.debug("#{self.class}::getVolumeByID: #{id}")
+    debug("#{self.class}::getVolumeByID: #{id}")
     volList = ListActiveVolumes({ 'startVolumeID' => id, \
                                   'limit' => 1 })
     volList['volumes'].each do |vol|
@@ -48,17 +51,17 @@ class SolidfireApi
                   'params' => Hash[*args.flatten],
                   'id' => 'puppet-' + rand(999).to_s,
                 }.to_json
-    Puppet.debug("#{self.class}::#{name}->post: #{post_body}")
+    debug("#{self.class}::#{name}->post: #{post_body}")
     resp = JSON.parse( http_post_request(post_body) )
     if resp['error']
       if resp['error']['name'] == 'xUnknownAPIMethod'
-        Puppet.debug("#{self.class}::xUnknownAPIMethod")
+        debug("#{self.class}::xUnknownAPIMethod")
         super
       else
         raise JSONRPCError, resp['error'] if resp['error']
       end
     else
-      Puppet.debug("#{self.class}::post_result: #{resp['result']}")
+      debug("#{self.class}::post_result: #{resp['result']}")
       resp['result']
     end
   end
@@ -72,6 +75,10 @@ class SolidfireApi
     request.content_type = 'application/json'
     request.body = post_body
     http.request(request).body
+  end
+
+  def debug(msg)
+    if @debug then puts msg end
   end
 
   class JSONRPCError < RuntimeError; end

@@ -7,6 +7,9 @@ class Puppet::Util::NetworkDevice::Solidfire::Device
   attr_accessor :transport
   def initialize(url, option = {})
     @transport = SolidfireApi.new(url)
+    if Puppet[:debug]
+      @transport.debug = true
+    end
 
     Puppet.debug("#{self.class}: connecting to SolidFire device " \
                  "#{@transport.redacted_url}")

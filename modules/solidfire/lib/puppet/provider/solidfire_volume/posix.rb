@@ -17,7 +17,6 @@ Puppet::Type.type(:solidfire_volume).provide(:posix, :parent => Puppet::Provider
     else
       volList.each do |vol|
         vol_hash = get_volume_properties(vol)
-        Puppet.debug("user -> #{vol_hash}")
         volumes << new(vol_hash)
       end
       volumes
@@ -34,7 +33,6 @@ Puppet::Type.type(:solidfire_volume).provide(:posix, :parent => Puppet::Provider
   end
 
   def initialize(value={})
-    Puppet.debug("#{self.class}::initialize #{value}")
     super(value)
     @property_flush = {}
   end
@@ -54,35 +52,47 @@ Puppet::Type.type(:solidfire_volume).provide(:posix, :parent => Puppet::Provider
   end
 
   def set_volume
-    if @property_flush[:ensure] == :absent
-      # volume is being deleted ... delete
-      transport.DeleteVolume( { "volumeID" => @property_hash[:volumeid] })
-      return
+    if vol = transport(conn_info).getVolumeByName(@resource[:name])
+      vol_id = vol['volumeID']
     end
-    size = Integer(resource[:size]) * 1000000000
-    acct_id = transport.GetAccountByName({'username' => \
-                  resource[:accountname]})['account']['accountID']
-    vol_id = transport.CreateVolume({"name" => resource[:name],
-                           "accountID" => acct_id,
-                           "totalSize" => size,
-                           "enable512e" => true,
-                           "qos" => { "minIOPS" => resource[:min_iops],
-                                      "maxIOPS" => resource[:max_iops],
-                                      "burstIOPS" => resource[:burst_iops]}}
+    if @property_flush[:ensure] == :absent
+      Puppet.debug("#{self.class}::Delete VolumeID #{vol_id}")
+      transport(conn_info).DeleteVolume( { "volumeID" => vol_id })
+      return
+    else
+      size = Integer(@resource[:size]) * 1000000000
+      acct_id = transport(conn_info).GetAccountByName({'username' => \
+                        @resource[:accountname]})['account']['accountID']
+      if vol_id
+        # vol exists modify
+        transport(conn_info).ModifyVolume({ "volumeID" => vol_id,
+                                            "accountID" => acct_id,
+                                            "totalSize" => size,
+                                            "qos" => 
+                                      { "minIOPS" => @resource[:min_iops],
+                                        "maxIOPS" => @resource[:max_iops],
+                                        "burstIOPS" => @resource[:burst_iops]}})
+      else
+        # vol doesn't exist create
+        Puppet.debug "Create Volume"
+        vol_id = transport(conn_info).CreateVolume({"name" => @resource[:name],
+                                                    "accountID" => acct_id,
+                                                    "totalSize" => size,
+                                                    "enable512e" => true,
+                                                    "qos" =>
+                                    { "minIOPS" => @resource[:min_iops],
+                                      "maxIOPS" => @resource[:max_iops],
+                                      "burstIOPS" => @resource[:burst_iops]}}
                                    )['volumeID']
+      end
     vol_id
+    end
   end
 
   def flush
     Puppet.debug("#{self.class}::flush")
-    begin
-      transport
-    rescue
-      transport("https://" + resource[:login] + ":" + resource[:password] + \
-                "@" + resource[:mvip] + "/" )
-    end
     if vol_id = set_volume
-      vol = transport.getVolumeByID(vol_id)
+      vol = transport(conn_info).getVolumeByID(vol_id)
       @property_hash = self.class.get_volume_properties(vol)
     end
   end
@@ -96,22 +106,12 @@ Puppet::Type.type(:solidfire_volume).provide(:posix, :parent => Puppet::Provider
   end
 
   def exists?
-    if @property_hash[:ensure] == :present
-      true
-    else
-      begin
-        volume = transport("https://" + resource[:login] + ":" + \
-                 resource[:password] + "@" + resource[:mvip] + "/" ).
-                 getVolumeByName(@resource[:name])
-      rescue
-      end
-      if volume
+    Puppet.debug "#{self.class}::exists?"
+    if @property_hash[:ensure] == :present then true
+    elsif volume = transport(conn_info).getVolumeByName(@resource[:name])
         @property_hash = self.class.get_volume_properties(volume)
         true
-      else
-        false
-      end
-    end
+    else false end
   end
 
 end

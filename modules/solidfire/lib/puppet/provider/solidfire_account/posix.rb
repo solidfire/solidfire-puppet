@@ -17,7 +17,6 @@ Puppet::Type.type(:solidfire_account).provide(:posix, :parent => Puppet::Provide
     else
       accountlist.each do |user|
         user_hash = get_account_properties(user)
-        Puppet.debug("user -> #{user_hash}")
         users << new(user_hash)
       end
       users
@@ -44,35 +43,37 @@ Puppet::Type.type(:solidfire_account).provide(:posix, :parent => Puppet::Provide
   end
 
   def initialize(value={})
-    Puppet.debug("#{self.class}::initialize #{value}")
     super(value)
     @property_flush = {}
   end
 
   def set_account
     if @property_flush[:ensure] == :absent
-      # account is being deleted ... delete
-      transport.RemoveAccount( { "accountID" => @property_hash[:accountid] })
+      # delete account
+      transport(conn_info).RemoveAccount( { "accountID" => @property_hash[:accountid] })
       return
-    end
-    acct_id = transport.AddAccount({"username" => resource[:username] })['accountID']
-    transport.ModifyAccount( { "accountID" => acct_id,
-                     "initiatorSecret" => resource[:initiatorsecret],
-                     "targetSecret" => resource[:targetsecret],
+    else
+      begin
+        acct = transport(conn_info).GetAccountByName({"username" => @resource[:username]})['account']
+        acct_id = acct['accountID']
+      rescue SolidfireApi::JSONRPCError => msg
+        if msg.message.include? "xUnknownAccount"
+           Puppet.debug "Create Account"
+           acct_id = transport(conn_info).AddAccount({"username" => @resource[:username] })['accountID']
+        end
+      end
+      transport(conn_info).ModifyAccount( { "accountID" => acct_id,
+                     "initiatorSecret" => @resource[:initiatorsecret],
+                     "targetSecret" => @resource[:targetsecret],
                    } )
-    acct_id
+      acct_id
+    end
   end
 
   def flush
     Puppet.debug("#{self.class}::flush")
-    begin
-      transport
-    rescue
-      transport("https://" + resource[:login] + ":" + resource[:password] + \
-                "@" + resource[:mvip] + "/" )
-    end
     if acct_id = set_account
-      acct = transport.GetAccountByID( {"accountID" => acct_id, })
+      acct = transport(conn_info).GetAccountByID( {"accountID" => acct_id, })
       @property_hash = self.class.get_account_properties(acct)
     end
   end
@@ -86,20 +87,16 @@ Puppet::Type.type(:solidfire_account).provide(:posix, :parent => Puppet::Provide
   end
 
   def exists?
-    if @property_hash[:ensure] == :present
-      true
+    Puppet.debug("#{self.class}::exists?")
+    if @property_hash[:ensure] == :present then true
     else
       begin
-        account = transport("https://" + resource[:login] + ":" + \
-                  resource[:password] + "@" + resource[:mvip] + "/" ).
-                  GetAccountByName({"username" => @resource[:username]})['account']
+        account = transport(conn_info).GetAccountByName({"username" => @resource[:username]})['account']
       rescue
-      end
-      if account
+        false
+      else
         @property_hash = self.class.get_account_properties(account)
         true
-      else
-        false
       end
     end
   end
