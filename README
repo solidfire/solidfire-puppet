@@ -1,0 +1,14 @@
+This is an initial attempt to create a puppet provider for SolidFire. At 
+present the code will run on any posix style machine and just use the SolidFire
+API to call over to the SolidFire cluster and do as instructed.
+
+In the future we will convert this over to the puppet network_device scenario
+at which the information for the SolidFire cluster can come from the device.conf
+file instead of being in the manifest as it is now.  
+
+At the present, I have written providers: 
+   solidfire_volume
+   solidfire_account
+
+For the moment the details are either in the code, or take a look at the 
+examples directory and the comments in each example manifest.
