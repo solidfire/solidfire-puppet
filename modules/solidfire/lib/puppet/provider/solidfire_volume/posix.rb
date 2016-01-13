@@ -1,3 +1,10 @@
+#====================================================================
+# Disclaimer: This script is written as best effort and provides no
+# warranty expressed or implied. Please contact the author(s) if you
+# have questions about this script before running or modifying
+#====================================================================
+# See the puppet forum on http://http://developer.solidfire.com/
+
 require 'puppet/provider/solidfire'
 require 'puppet/util/network_device'
 
@@ -60,6 +67,10 @@ Puppet::Type.type(:solidfire_volume).provide(:posix,
     if @property_flush[:ensure] == :absent
       Puppet.debug("#{self.class}::Delete VolumeID #{vol_id}")
       transport(conn_info).DeleteVolume( { "volumeID" => vol_id })
+      # This is final, purge the deleted volume, so the account can be deleted
+      # if requested. Still need to reverse the dependence to do so, but at
+      # least this allows it to happen.
+      transport(conn_info).PurgeDeletedVolume( {"volumeID" => vol_id })
       return
     else
       size = Integer(@resource[:size]) * 1000000000
