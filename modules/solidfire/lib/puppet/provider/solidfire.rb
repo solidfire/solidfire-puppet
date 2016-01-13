@@ -6,7 +6,7 @@ class Puppet::Provider::Solidfire < Puppet::Provider
 
   def self.transport(args=nil)
     @device ||= Puppet::Util::NetworkDevice.current
-    if not @device and Facter.value(:url) then
+    if not @device and Facter.value(:url)
       Puppet.debug "NetworkDevice::SolidFire: connecting via facter url."
       @device ||= Puppet::Util::NetworkDevice::Solidfire::Device.new(Facter.value(:url))
     elsif not @device and args and args.length == 1

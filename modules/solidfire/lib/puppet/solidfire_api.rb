@@ -20,14 +20,14 @@ class SolidfireApi
     redacted_url = @url.dup
     redacted_url.password = "****" if redacted_url.password
     @redacted_url=redacted_url.to_s
-    @url.path = @url.path + "json-rpc/#{VERSION}"
+    @url.path = @url.path + "/json-rpc/#{VERSION}"
   end
 
   def getVolumeByName(name)
     debug("#{self.class}::getVolumeByName: #{name}")
     volList = ListActiveVolumes()
     volList['volumes'].each do |vol|
-      if vol['name'] == name then
+      if vol['name'] == name
         return vol
       end
     end
@@ -39,8 +39,31 @@ class SolidfireApi
     volList = ListActiveVolumes({ 'startVolumeID' => id, \
                                   'limit' => 1 })
     volList['volumes'].each do |vol|
-      if vol['volumeID'] == id then
+      if vol['volumeID'] == id
         return vol
+      end
+    end
+    nil
+  end
+
+  def getVagByName(name)
+    debug("#{self.class}::getVagByName: #{name}")
+    vagList = ListVolumeAccessGroups()
+    vagList['volumeAccessGroups'].each do |vag|
+      if vag['name'] == name
+        return vag
+      end
+    end
+    nil
+  end
+
+  def getVagByID(id)
+    debug("#{self.class}::getVagByID: #{id}")
+    vagList = ListVolumeAccessGroups({ 'startVolumeAccessGroupID' => id, \
+                                       'limit' => 1 })
+    vagList['volumeAccessGroups'].each do |vag|
+      if vag['volumeAccessGroupID'] == id
+        return vag
       end
     end
     nil
@@ -78,7 +101,7 @@ class SolidfireApi
   end
 
   def debug(msg)
-    if @debug then puts msg end
+    puts msg if @debug
   end
 
   class JSONRPCError < RuntimeError; end

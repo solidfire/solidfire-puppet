@@ -1,7 +1,8 @@
 require 'puppet/provider/solidfire'
 require 'puppet/util/network_device'
 
-Puppet::Type.type(:solidfire_volume).provide(:posix, :parent => Puppet::Provider::Solidfire) do
+Puppet::Type.type(:solidfire_volume).provide(:posix,
+                                    :parent => Puppet::Provider::Solidfire) do
   desc "Manage SolidFire Volume creation, modification and deletion."
   confine :feature => :posix
 
@@ -40,14 +41,15 @@ Puppet::Type.type(:solidfire_volume).provide(:posix, :parent => Puppet::Provider
   def self.get_volume_properties(vol)
     acct_name = transport.GetAccountByID({'accountID' => vol['accountID'] \
                                  })['account']['username']
-    vol_hash = { :accountname   => acct_name,
-                 :name          => vol['name'],
+    vol_hash = { :name          => vol['name'],
+                 :accountname   => acct_name,
                  :ensure        => :present,
                  :size          => ( vol['totalSize'] / 1000000000 ).to_s,
                  :min_iops      => vol['qos']['minIOPS'],
                  :max_iops      => vol['qos']['maxIOPS'],
                  :burst_iops    => vol['qos']['burstIOPS'],
-                 :volumeid      => vol['volumeID"'],
+                 :volumeid      => vol['volumeID'],
+                 :iqn           => vol['iqn'],
                 }
   end
 

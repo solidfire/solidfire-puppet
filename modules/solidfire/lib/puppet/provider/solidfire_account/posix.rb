@@ -1,7 +1,8 @@
 require 'puppet/provider/solidfire'
 require 'puppet/util/network_device'
 
-Puppet::Type.type(:solidfire_account).provide(:posix, :parent => Puppet::Provider::Solidfire) do
+Puppet::Type.type(:solidfire_account).provide(:posix,
+                                   :parent => Puppet::Provider::Solidfire) do
   desc "Manage SolidFire account creation and deletion."
   confine :feature => :posix
 
@@ -50,22 +51,25 @@ Puppet::Type.type(:solidfire_account).provide(:posix, :parent => Puppet::Provide
   def set_account
     if @property_flush[:ensure] == :absent
       # delete account
-      transport(conn_info).RemoveAccount( { "accountID" => @property_hash[:accountid] })
+      transport(conn_info).RemoveAccount(
+                                { "accountID" => @property_hash[:accountid] })
       return
     else
       begin
-        acct = transport(conn_info).GetAccountByName({"username" => @resource[:username]})['account']
+        acct = transport(conn_info).GetAccountByName(
+                              {"username" => @resource[:username]})['account']
         acct_id = acct['accountID']
       rescue SolidfireApi::JSONRPCError => msg
         if msg.message.include? "xUnknownAccount"
            Puppet.debug "Create Account"
-           acct_id = transport(conn_info).AddAccount({"username" => @resource[:username] })['accountID']
+           acct_id = transport(conn_info).AddAccount(
+                           {"username" => @resource[:username] })['accountID']
         end
       end
       transport(conn_info).ModifyAccount( { "accountID" => acct_id,
-                     "initiatorSecret" => @resource[:initiatorsecret],
-                     "targetSecret" => @resource[:targetsecret],
-                   } )
+                               "initiatorSecret" => @resource[:initiatorsecret],
+                               "targetSecret" => @resource[:targetsecret],
+                                           } )
       acct_id
     end
   end
@@ -91,7 +95,8 @@ Puppet::Type.type(:solidfire_account).provide(:posix, :parent => Puppet::Provide
     if @property_hash[:ensure] == :present then true
     else
       begin
-        account = transport(conn_info).GetAccountByName({"username" => @resource[:username]})['account']
+        account = transport(conn_info).GetAccountByName(
+                              {"username" => @resource[:username]})['account']
       rescue
         false
       else

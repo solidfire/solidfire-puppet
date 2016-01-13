@@ -30,20 +30,29 @@ Puppet::Type.newtype(:solidfire_account) do
   end
 
   newproperty(:accountid) do
+    desc "AccountID is supplied by the cluster."
+    validate do |val|
+      fail "accountid is read-only"
+    end
   end
 
   #  These are on every SolidFire type
 
   newparam(:mvip) do
+    desc "The Management Virtual IP address."
   end
 
   newparam(:login) do
+    desc "The cluster admin login to use."
   end
 
   newparam(:password) do
+    desc "The password for the Cluster admin."
   end
 
   newparam(:url) do
+    desc "If using URL do not use mvip, login, and password. "\
+         "URL in the form of https://acct:passwd@mvip/ "
   end
 
 end
