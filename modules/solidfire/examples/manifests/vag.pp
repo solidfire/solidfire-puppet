@@ -5,20 +5,20 @@
 #====================================================================
 # See the puppet forum on http://http://developer.solidfire.com/
 #
-# Example manifest to use the solidfire_account class
+# Example manifest to use the solidfire_vag class
 #
 # Parameters:
 #
 # ==== Required
 # [*ensurable*]
-# [*username*]        - Account name (alias: name)
+# [*name*]            - Volume access group name (only letters and - allowed)
+# [*initiators*]      - Array of the iscsi initiators allowed
+# [*volumes*]         - Array of the volume names allowed
 #
 # ==== Optional
-# [*initiatorsecret*] - Initiator CHAP secret.
-# [*targetsecret*]    - Target CHAP secret.
 #
 # ==== Read-only
-# [*accountid*]       - The cluster assigned account ID for this account.
+# [*vagid*]           - The cluster assigned VAG ID for this VAG.
 #
 # ==== Connection parameters
 # [*url*]             - The connections URL as https://login:password@mvip
@@ -28,10 +28,10 @@
 #                       dns name works too.
 #
 #
-solidfire_account { 'solidfireAccount':
+solidfire_vag { 'solidfirevolumeaccesgroup':
   ensure        => 'present',
-  initiatorsecret => 'inisecret123',
-  targetsecret  => 'tgtsecret123',
+  initiators    => ['iqn.1994-05.com.rhat:1788', 'iqn.1994-05.com.rhat:1758'],
+  volumes       => ['volumename1', 'volumename2'],
   mvip          => '10.10.1.84',
   passwd        => 'solidfire',
   login         => 'admin',

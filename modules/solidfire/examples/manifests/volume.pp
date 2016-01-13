@@ -9,39 +9,42 @@
 #
 # Parameters:
 #
-# [*ensure*}
-#  The resource state
+# ==== Required
+# [*ensurable*]
+# [*name*]            - The volume name ( only letters numbers and - allowed)
+# [*accountname*]     - The account name this volume should live within
+# [*size*]            - Size of the volume in GB
 #
-# [*mvip*]
-#  The Management Virtual IP of the SolidFire cluster
+# ==== Optional
+#       (IOPS parameters default to cluster defaults if undefined)
+# [*min_iops*]        - The minimum IOP guarantee for the volume 
+#                       (range 100-15,000)
+# [*max_iops*]        - The maximum IOP limit for the volume
+#                       (range 100-100,000)
+# [*burst_iops*]      - The burst IOP limit for the volume
+#                       (range 100-100,000)
 #
-# [*passwd*]
-#  The password for the cluster admin account
+# ==== Read-only
+# [*volumeid*]        - The cluster assigned volume ID for this volume.
+# [*iqn*]             - The cluster assigned iSCSI IQN for this volume.
 #
-# [*login*]
-#  The cluster admin account to use to create the volumes
-#
-# [*volsize*]
-#  Size of the volume
-#
-# [*min_iops*]
-#  The minimum IOP guarantee for the volume
-#
-# [*max_iops*]
-#  The maximum IOP limit for the volume
-#
-# [*burst_iops*]
-#  The burst IOP limit for the volume
+# ==== Connection parameters
+# [*url*]             - The connections URL as https://login:password@mvip
+# [*login*]           - The cluster admin account
+# [*password*]        - The cluster admin password
+# [*mvip*]            - The cluster Management Virtual IP address (mvip)
+#                       dns name works too.
 #
 #
-solidfire_volume { 'volumeName': 
-  ensure        => 'present', 
+solidfire_volume { 'volumeName':
+  ensure        => 'present',
+  accountname   => 'solidfireAccount',
+  size          => 3,
+  min_iops      => 420,
+  max_iops      => 520,
+  burst_iops    => 610,
   mvip          => '10.10.1.84',
   passwd        => 'solidfire',
-  login         => 'admin', 
-  volsize       => 3, 
-  account       => 'solidfireAccount', 
-  min_iops      => 420, 
-  max_iops      => 520, 
-  burst_iops    => 610
+  login         => 'admin',
+  url           => 'https://admin:password@cluster.solidfire.com'
 }
