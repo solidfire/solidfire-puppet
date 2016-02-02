@@ -11,7 +11,7 @@ require 'json'
 require 'openssl'
 
 class SolidfireApi
-  VERSION = "7.0"
+  VERSION = "8.0"
 
   attr_accessor :url, :redacted_url, :debug
 
@@ -71,6 +71,17 @@ class SolidfireApi
     vagList['volumeAccessGroups'].each do |vag|
       if vag['volumeAccessGroupID'] == id
         return vag
+      end
+    end
+    nil
+  end
+
+  def getSchedByName(name)
+    debug("#{self.class}::getSchedByName: #{name}")
+    schedList = ListSchedules()
+    schedList['schedules'].each do |sched|
+      if sched['scheduleName'] == name
+        return sched
       end
     end
     nil

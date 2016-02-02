@@ -41,6 +41,9 @@ BURSTIOPS_MAX = 100000
            "#{MINIOPS_MIN}..#{MINIOPS_MAX}") unless \
            value.to_i.between?(MINIOPS_MIN, MINIOPS_MAX)
     end
+    munge do |value|
+      Integer(value)
+    end
   end
 
   newproperty(:max_iops) do
@@ -49,6 +52,9 @@ BURSTIOPS_MAX = 100000
            "#{MAXIOPS_MIN}..#{MAXIOPS_MAX}") unless \
            value.to_i.between?(MAXIOPS_MIN, MAXIOPS_MAX)
     end
+    munge do |value|
+      Integer(value)
+    end
   end
 
   newproperty(:burst_iops) do
@@ -56,6 +62,9 @@ BURSTIOPS_MAX = 100000
       fail("burst_iops not within valid range " \
            "#{BURSTIOPS_MIN}..#{BURSTIOPS_MAX}") unless \
            value.to_i.between?(BURSTIOPS_MIN, BURSTIOPS_MAX)
+    end
+    munge do |value|
+      Integer(value)
     end
   end
 
