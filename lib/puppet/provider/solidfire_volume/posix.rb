@@ -81,7 +81,7 @@ Puppet::Type.type(:solidfire_volume).provide(:posix,
         transport(conn_info).ModifyVolume({ "volumeID" => vol_id,
                                             "accountID" => acct_id,
                                             "totalSize" => size,
-                                            "qos" => 
+                                            "qos" =>
                                       { "minIOPS" => @resource[:min_iops],
                                         "maxIOPS" => @resource[:max_iops],
                                         "burstIOPS" => @resource[:burst_iops]}})
