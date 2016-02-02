@@ -17,7 +17,7 @@
 #
 # ==== Optional
 #       (IOPS parameters default to cluster defaults if undefined)
-# [*min_iops*]        - The minimum IOP guarantee for the volume 
+# [*min_iops*]        - The minimum IOP guarantee for the volume
 #                       (range 100-15,000)
 # [*max_iops*]        - The maximum IOP limit for the volume
 #                       (range 100-100,000)
