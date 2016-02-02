@@ -146,3 +146,11 @@ it's operations.
 Please see the [Puppet forum](http://developer.solidfire.com/forum/puppet) on
 the [SolidFire Developer Portal](https://developer.solidfire.com) for any issues,
 discussion, advice or contribution(s).
+
+To get started with developing this module, you'll need a functioning Ruby installation
+with Bundler. Afterward, ensure you have the necessary dependencies and run some tests:
+
+    $ bundle install
+    $ bundle exec rake test
+
+Happy hacking!
