@@ -9,6 +9,8 @@ group :rake, :test do
 end
 
 group :rake, :development do
+  gem 'travis',            :require => false
+  gem 'travis-lint',       :require => false
   gem 'puppet-syntax',     :require => false
   gem 'puppet-blacksmith', :require => false
 end
