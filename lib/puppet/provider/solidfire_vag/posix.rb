@@ -47,10 +47,14 @@ Puppet::Type.type(:solidfire_vag).provide(:posix,
   end
 
   def self.get_vag_properties(vag)
+    volumes = vag['volumes'].collect do |vol_id|
+      volume = transport.getVolumeByID(vol_id)
+      volume['name']
+    end
     vag_hash = { :name          => vag['name'],
                  :ensure        => :present,
                  :vagid         => vag['volumeAccessGroupID"'],
-                 :volumes       => vag['volumes'],
+                 :volumes       => volumes,
                  :initiators    => vag['initiators'],
                 }
   end
