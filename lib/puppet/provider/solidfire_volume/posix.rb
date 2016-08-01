@@ -57,6 +57,7 @@ Puppet::Type.type(:solidfire_volume).provide(:posix,
                  :burst_iops    => vol['qos']['burstIOPS'],
                  :volumeid      => vol['volumeID'],
                  :iqn           => vol['iqn'],
+                 :enable512e    => vol['enable512e'].to_s.to_sym,
                 }
   end
 
@@ -91,7 +92,7 @@ Puppet::Type.type(:solidfire_volume).provide(:posix,
         vol_id = transport(conn_info).CreateVolume({"name" => @resource[:name],
                                                     "accountID" => acct_id,
                                                     "totalSize" => size,
-                                                    "enable512e" => true,
+                                                    "enable512e" => @resource[:enable512e],
                                                     "qos" =>
                                     { "minIOPS" => @resource[:min_iops],
                                       "maxIOPS" => @resource[:max_iops],
