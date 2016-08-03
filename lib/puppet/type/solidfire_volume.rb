@@ -9,11 +9,11 @@ Puppet::Type.newtype(:solidfire_volume) do
   @doc = "Manage Volumes on solidfire cluster"
 
 #Ranges for the IOPS values
-MINIOPS_MIN = 100
+MINIOPS_MIN = 50
 MINIOPS_MAX = 15000
-MAXIOPS_MIN = 100
+MAXIOPS_MIN = 50
 MAXIOPS_MAX = 100000
-BURSTIOPS_MIN = 100
+BURSTIOPS_MIN = 50
 BURSTIOPS_MAX = 100000
 
   apply_to_all
