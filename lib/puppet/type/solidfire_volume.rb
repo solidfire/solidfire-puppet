@@ -68,6 +68,11 @@ BURSTIOPS_MAX = 100000
     end
   end
 
+  newproperty(:enable512e) do
+    defaultto :true
+    newvalues(:true, :false)
+  end
+
   newproperty(:volumeid) do
     desc "VolumeID supplied by the cluster."
     validate do |value|
