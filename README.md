@@ -143,8 +143,8 @@ it's operations.
 
 ## Development
 
-Please see the [Puppet forum](http://developer.solidfire.com/forum/puppet) on
-the [SolidFire Developer Portal](https://developer.solidfire.com) for any issues,
+Please see the [NetApp Developer Network](http://community.netapp.com/t5/Developer-Network/ct-p/developer-network) or
+the [NetApp's thePub](http://netapp.io/configuration-management/) for any issues,
 discussion, advice or contribution(s).
 
 To get started with developing this module, you'll need a functioning Ruby installation
