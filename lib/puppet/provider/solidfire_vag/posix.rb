@@ -66,7 +66,7 @@ Puppet::Type.type(:solidfire_vag).provide(:posix,
     end
 
     if @property_flush[:ensure] == :absent
-      Puppet.debug("#{self.class}::Delete VAG ID #{vol_id}")
+      Puppet.debug("#{self.class}::Delete VAG ID #{vag_id}")
       transport(conn_info).DeleteVolumeAccessGroup( { "volumeAccessGroupID" =>
                                                        vag_id })
       return
@@ -76,19 +76,23 @@ Puppet::Type.type(:solidfire_vag).provide(:posix,
     volumes = transport(conn_info).ListActiveVolumes()['volumes'] |
                      transport(conn_info).ListDeletedVolumes()['volumes']
     vol_ids=[]
-    @resource[:volumes].each do |name|
-      vol_ids << volumes.map { |x| x['volumeID'] if x['name'] == name }
+    if @resource[:volumes]
+      @resource[:volumes].each do |name|
+        vol_ids << volumes.map { |x| x['volumeID'] if x['name'] == name }
+      end
+      vol_ids = vol_ids.flatten.compact
     end
-    vol_ids = vol_ids.flatten.compact
 
     if vag_id
       # vag exists modify
       # got vag as it exists, since we are here, we have checked it exists
       # check for and delete initiators as needed
-      delinit = (vag['initiators']-@resource[:initiators])
-      transport(conn_info).RemoveInitiatorsFromVolumeAccessGroup(
-                                       { "volumeAccessGroupID" => vag_id,
-                                         "initiators"          => delinit, } )
+      if @resource[:initiators]
+        delinit = (vag['initiators']-@resource[:initiators])
+        transport(conn_info).RemoveInitiatorsFromVolumeAccessGroup(
+                                         { "volumeAccessGroupID" => vag_id,
+                                           "initiators"          => delinit, } )
+      end
       # check for and delete volumes as needed
       delvol = (vag['volumes']-vol_ids)
       transport(conn_info).RemoveVolumesFromVolumeAccessGroup(
