@@ -22,10 +22,18 @@ Puppet::Type.newtype(:solidfire_vag) do
 
   newproperty(:initiators, :array_matching => :all) do
     desc "List of initiators to include in the Volume Access Group"
+
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
 
   newproperty(:volumes, :array_matching => :all) do
     desc "List of Volume Names to include in the Volume Access Group"
+
+    def insync?(is)
+      is.sort == should.sort
+    end
   end
 
   newproperty(:vagid) do
