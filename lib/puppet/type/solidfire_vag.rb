@@ -22,10 +22,64 @@ Puppet::Type.newtype(:solidfire_vag) do
 
   newproperty(:initiators, :array_matching => :all) do
     desc "List of initiators to include in the Volume Access Group"
+
+    def insync?(is)
+      is.sort == should.sort
+    end
+
+    def change_to_s(currentvalue, newvalue)
+      currentvalue = if currentvalue == :absent || currentvalue.nil?
+                       []
+                     else
+                       currentvalue
+                     end
+      newvalue = if newvalue == :absent
+                   []
+                 else
+                   newvalue
+                 end
+      changes = []
+      removing = currentvalue - newvalue
+      adding = newvalue - currentvalue
+      if removing != []
+        changes << "Removing initiators: #{removing.join(',')}"
+      end
+      if adding != []
+        changes << "Adding initiators: #{adding.join(',')}"
+      end
+      changes.join(' ')
+    end
   end
 
   newproperty(:volumes, :array_matching => :all) do
     desc "List of Volume Names to include in the Volume Access Group"
+
+    def insync?(is)
+      is.sort == should.sort
+    end
+
+    def change_to_s(currentvalue, newvalue)
+      currentvalue = if currentvalue == :absent || currentvalue.nil?
+                       []
+                     else
+                       currentvalue
+                     end
+      newvalue = if newvalue == :absent
+                   []
+                 else
+                   newvalue
+                 end
+      changes = []
+      removing = currentvalue - newvalue
+      adding = newvalue - currentvalue
+      if removing != []
+        changes << "Removing volumes: #{removing.join(',')}"
+      end
+      if adding != []
+        changes << "Adding volumes: #{adding.join(',')}"
+      end
+      changes.join(' ')
+    end
   end
 
   newproperty(:vagid) do
